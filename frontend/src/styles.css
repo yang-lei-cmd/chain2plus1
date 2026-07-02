@@ -123,6 +123,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 
 @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
+/* ========== Share Page ========== */
+.share-intro { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 16px; text-align: center; }
+.share-intro strong { color: #f5222d; }
+.share-code-box { text-align: center; margin-bottom: 16px; padding: 16px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 12px; color: white; }
+.share-label { font-size: 12px; opacity: 0.8; margin-bottom: 4px; }
+.share-code { font-size: 28px; font-weight: 700; letter-spacing: 4px; font-family: monospace; }
+.share-link-box { margin-bottom: 16px; }
+.share-link-row { display: flex; gap: 8px; }
+.share-link-input { flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; color: #666; background: #fafafa; }
+.share-actions { margin-bottom: 16px; }
+.share-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.share-stat-item { text-align: center; padding: 12px; background: #fafafa; border-radius: 8px; }
+.share-stat-value { display: block; font-size: 20px; font-weight: 700; color: #667eea; }
+.share-stat-label { display: block; font-size: 12px; color: #999; margin-top: 2px; }
+
 /* ========== Loading / Empty ========== */
 .loading { text-align: center; padding: 40px; color: #999; font-size: 14px; }
 .empty-state { text-align: center; padding: 30px; color: #999; font-size: 14px; }

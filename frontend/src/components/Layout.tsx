@@ -22,6 +22,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { path: '/orders', label: '下单', icon: '📦' },
     { path: '/withdraw', label: '提现', icon: '💳' },
     { path: '/profits', label: '收益', icon: '📈' },
+    { path: '/share', label: '邀请', icon: '🔗' },
     { path: '/freelance', label: '任务', icon: '🔧' },
   ];
 

@@ -9,6 +9,7 @@ import WithdrawPage from './pages/WithdrawPage';
 import ProfitPage from './pages/ProfitPage';
 import ProfilePage from './pages/ProfilePage';
 import FreelancePage from './pages/FreelancePage';
+import SharePage from './pages/SharePage';
 import AdminPage from './pages/AdminPage';
 import { useToast } from './components/Toast';
 import './styles.css';
@@ -45,6 +46,7 @@ function AppContent() {
       case '/profits': return <ProfitPage />;
       case '/profile': return <ProfilePage />;
       case '/freelance': return <FreelancePage />;
+      case '/share': return <SharePage />;
       case '/admin': return <AdminPage />;
       default: return <HomePage />;
     }

@@ -46,6 +46,7 @@ func setupTestDB(t *testing.T) {
 			&model.ThirdPartyPayment{}, &model.SupplierInvoice{},
 			&model.Freelancer{}, &model.Task{}, &model.TimeLog{},
 			&model.Settlement{}, &model.Rating{},
+		&model.AuditLog{},
 		)
 		testDB.AutoMigrate(
 			&model.User{}, &model.Product{}, &model.Supplier{},
@@ -54,6 +55,7 @@ func setupTestDB(t *testing.T) {
 			&model.ThirdPartyPayment{}, &model.SupplierInvoice{},
 			&model.Freelancer{}, &model.Task{}, &model.TimeLog{},
 			&model.Settlement{}, &model.Rating{},
+		&model.AuditLog{},
 		)
 		return
 	}
@@ -71,6 +73,7 @@ func setupTestDB(t *testing.T) {
 		&model.ThirdPartyPayment{}, &model.SupplierInvoice{},
 		&model.Freelancer{}, &model.Task{}, &model.TimeLog{},
 		&model.Settlement{}, &model.Rating{},
+		&model.AuditLog{},
 	)
 
 	database.DB = testDB

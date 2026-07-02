@@ -264,3 +264,18 @@ type LeaderboardRank struct {
 	Ranking   int    `gorm:"default:0" json:"ranking"`    // 当前排名
 }
 
+// ============================================================
+// Phase C: 审计日志
+// ============================================================
+
+// AuditLog 操作审计日志表
+type AuditLog struct {
+	BaseModel
+	UserID   uint   `gorm:"index" json:"user_id"`
+	Username string `gorm:"type:varchar(50)" json:"username"`
+	Action   string `gorm:"type:varchar(50);index" json:"action"`     // approve_withdraw, reject_withdraw, toggle_user, admin_recharge
+	Target   string `gorm:"type:varchar(100)" json:"target"`          // 操作对象描述
+	Detail   string `gorm:"type:text" json:"detail"`                  // 详细信息(JSON)
+	IP       string `gorm:"type:varchar(45)" json:"ip"`
+}
+

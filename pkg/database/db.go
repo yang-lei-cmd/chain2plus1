@@ -73,6 +73,8 @@ func Migrate() {
 		&model.TimeLog{},
 		&model.Settlement{},
 		&model.Rating{},
+		// Phase C: 审计日志
+		&model.AuditLog{},
 	)
 
 	if err != nil {

@@ -178,6 +178,11 @@ func Setup(cfg *config.Config, wsHandler *event.WSHandler) *gin.Engine {
 			admin.GET("/dashboard/order-stats", dashboardHandler.OrderStatistics)
 			admin.GET("/dashboard/top-users", dashboardHandler.TopUsers)
 			admin.GET("/dashboard/freelance-stats", dashboardHandler.FreelanceStatistics)
+
+			// ============================================================
+			// Phase C: 审计日志路由
+			// ============================================================
+			admin.GET("/audit-logs", handler.ListAuditLogs)
 		}
 	}
 

@@ -45,6 +45,7 @@ func InitTestDB() (*gorm.DB, error) {
 			&model.TimeLog{},
 			&model.Settlement{},
 			&model.Rating{},
+		&model.AuditLog{},
 		)
 		testErr = err
 		testDB = database
@@ -60,6 +61,7 @@ func ResetTestDB(db *gorm.DB) error {
 		&model.Withdraw{}, &model.ThirdPartyPayment{},
 		&model.Freelancer{}, &model.Task{}, &model.TimeLog{},
 		&model.Settlement{}, &model.Rating{},
+		&model.AuditLog{},
 	)
 	return InitTestDBInternal(db)
 }
@@ -79,5 +81,6 @@ func InitTestDBInternal(db *gorm.DB) error {
 		&model.TimeLog{},
 		&model.Settlement{},
 		&model.Rating{},
+		&model.AuditLog{},
 	)
 }
