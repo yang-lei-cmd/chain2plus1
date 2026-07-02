@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import { useAuth } from '../lib/auth';
 import { useToast } from '../components/Toast';
+import { generateQR } from '../lib/qrcode';
 
 export default function SharePage() {
   const { user } = useAuth();
   const { show } = useToast();
   const [copied, setCopied] = useState(false);
-  const [qrVisible, setQrVisible] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
   if (!user) return null;
 
   const inviteCode = user.invite_code || '';
   const shareUrl = `${window.location.origin}/#/register?invite=${inviteCode}`;
-  const appStoreUrl = window.location.origin; // PWA install link
 
   const handleCopy = async () => {
     try {
@@ -21,7 +21,6 @@ export default function SharePage() {
       show('链接已复制', 'success');
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback
       const ta = document.createElement('textarea');
       ta.value = shareUrl;
       document.body.appendChild(ta);
@@ -33,9 +32,6 @@ export default function SharePage() {
       setTimeout(() => setCopied(false), 2000);
     }
   };
-
-  // Simple encoded invite param via URL
-  const encodedInvite = encodeURIComponent(inviteCode);
 
   return (
     <div>
@@ -61,6 +57,17 @@ export default function SharePage() {
           </div>
         </div>
 
+        {/* QR Code Section */}
+        <div className="share-qr-section">
+          {!showQR ? (
+            <button className="btn btn-primary" onClick={() => setShowQR(true)}>
+              📷 查看分享二维码
+            </button>
+          ) : (
+            <div className="share-qr-container" dangerouslySetInnerHTML={{ __html: generateQR(shareUrl, 200) }} />
+          )}
+        </div>
+
         <div className="share-actions">
           <button
             className="btn btn-primary"
@@ -74,7 +81,6 @@ export default function SharePage() {
           </button>
         </div>
 
-        {/* Quick stats */}
         <div className="share-stats">
           <div className="share-stat-item">
             <span className="share-stat-value">10%</span>

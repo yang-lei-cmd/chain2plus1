@@ -1,0 +1,16 @@
+# Chain2Plus1 — Railway Deployment
+#
+# 1. Install Railway CLI: npm i -g @railway/cli
+# 2. Login: railway login
+# 3. Deploy: railway up
+#
+# Environment variables are set via Railway dashboard.
+
+[build]
+  builder = "nixpacks"
+  buildCommand = ""
+
+[deploy]
+  healthcheckPath = "/health"
+  restartPolicyType = "on-failure"
+  restartPolicyMaxRetries = 5

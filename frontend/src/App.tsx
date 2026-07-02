@@ -11,6 +11,7 @@ import ProfilePage from './pages/ProfilePage';
 import FreelancePage from './pages/FreelancePage';
 import SharePage from './pages/SharePage';
 import AdminPage from './pages/AdminPage';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 import { useToast } from './components/Toast';
 import './styles.css';
 
@@ -59,6 +60,7 @@ export default function App() {
   return (
     <ToastProvider>
       <AppContent />
+      <PWAInstallPrompt />
     </ToastProvider>
   );
 }
