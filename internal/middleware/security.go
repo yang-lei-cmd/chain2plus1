@@ -17,6 +17,8 @@ func SecurityHeaders() gin.HandlerFunc {
 		c.Header("X-XSS-Protection", "1; mode=block")
 		c.Header("Referrer-Policy", "strict-origin-when-cross-origin")
 		c.Header("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+		// Content-Security-Policy
+		c.Header("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' ws: wss:")
 		// Strict-Transport-Security — only in non-dev mode
 		if gin.Mode() != gin.DebugMode {
 			c.Header("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
