@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>数据分析看板 - 链动2+1</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* ===== 数据分析看板专用样式 ===== */
+        .dashboard-container {
+            padding: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .dashboard-header h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .dashboard-time-filter {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .time-filter-btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 16px;
+            background: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .time-filter-btn.active {
+            background: #4f46e5;
+            color: #fff;
+            border-color: #4f46e5;
+        }
+
+        /* 统计卡片网格 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-card .stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .stat-card .stat-change {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .stat-change.positive {
+            color: #dc2626;
+        }
+
+        .stat-change.negative {
+            color: #16a34a;
+        }
+
+        /* 图表区域 */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .charts-grid.two-col {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .chart-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .chart-card h3 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-card h3 .chart-icon {
+            font-size: 18px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 280px;
+        }
+
+        /* 数据表格 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        .data-table tr:hover {
+            background: #fafafa;
+        }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .rank-1 {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #fff;
+        }
+
+        .rank-2 {
+            background: linear-gradient(135deg, #d1d5db, #9ca3af);
+            color: #fff;
+        }
+
+        .rank-3 {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            color: #fff;
+        }
+
+        .rank-default {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        /* 加载状态 */
+        .loading-overlay {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #4f46e5;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* 空数据提示 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 16px;
+            color: #999;
+        }
+
+        .empty-state .empty-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        /* 返回按钮 */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #f8f9fa;
+            border-color: #4f46e5;
+            color: #4f46e5;
+        }
+
+        /* Tab 切换 */
+        .dashboard-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0;
+        }
+
+        .dash-tab-btn {
+            padding: 10px 16px;
+            border: none;
+            background: none;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .dash-tab-btn.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+            font-weight: 600;
+        }
+
+        .dash-tab-content {
+            display: none;
+        }
+
+        .dash-tab-content.active {
+            display: block;
+        }
+
+        /* 管理后台入口 */
+        .admin-back-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            padding: 12px 20px;
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            z-index: 100;
+            transition: all 0.2s;
+        }
+
+        .admin-back-btn:hover {
+            background: #4338ca;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .chart-wrapper {
+                height: 220px;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- 返回按钮 -->
+        <button class="back-btn" onclick="goBack()">← 返回</button>
+
+        <!-- 头部 -->
+        <div class="dashboard-header">
+            <h2>📊 数据分析看板</h2>
+            <div class="dashboard-time-filter">
+                <button class="time-filter-btn active" onclick="changeTimeRange('7d', this)">近7天</button>
+                <button class="time-filter-btn" onclick="changeTimeRange('30d', this)">近30天</button>
+                <button class="time-filter-btn" onclick="changeTimeRange('90d', this)">近90天</button>
+            </div>
+        </div>
+
+        <!-- 加载中 -->
+        <div id="dashboard-loading" class="loading-overlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">正在加载数据...</div>
+        </div>
+
+        <!-- Tab 1: 概览 -->
+        <div id="dash-overview-tab" class="dash-tab-content active">
+            <!-- 统计卡片 -->
+            <div class="stats-grid" id="stats-cards">
+                <!-- 动态填充 -->
+            </div>
+
+            <!-- 图表 -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3><span class="chart-icon">📈</span> 收益趋势（近 N 天）</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="revenue-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3><span class="chart-icon">👥</span> 用户增长（近 N 天）</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="user-growth-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3><span class="chart-icon">🛒</span> 订单统计（按状态）</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="order-status-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Top 用户 -->
+        <div id="dash-top-users-tab" class="dash-tab-content">
+            <div class="chart-card">
+                <h3><span class="chart-icon">🏆</span> 收益 Top 10 用户排行</h3>
+                <div style="overflow-x: auto;">
+                    <table class="data-table" id="top-users-table">
+                        <thead>
+                            <tr>
+                                <th>排名</th>
+                                <th>用户名</th>
+                                <th>累计收益（元）</th>
+                                <th>团队人数</th>
+                                <th>订单数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 动态填充 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="top-users-empty" class="empty-state" style="display:none">
+                    <div class="empty-icon">📭</div>
+                    <p>暂无用户数据</p>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3><span class="chart-icon">📊</span> Top 10 收益分布</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="top-users-bar-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: 自由职业者统计 -->
+        <div id="dash-freelance-tab" class="dash-tab-content">
+            <div class="stats-grid" id="freelance-stats-cards">
+                <!-- 动态填充 -->
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3><span class="chart-icon">💼</span> 任务状态分布</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="task-status-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3><span class="chart-icon">⭐</span> 评分趋势</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="rating-trend-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="websocket-notifications.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

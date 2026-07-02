@@ -1,0 +1,52 @@
+# ============================================================
+# Chain2Plus1 一键部署 (Docker Compose)
+# ============================================================
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: chain2plus1-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Linqi@2024
+      MYSQL_DATABASE: chain2plus1
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pLinqi@2024"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chain2plus1-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      MODE: "release"
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: Linqi@2024
+      DB_NAME: chain2plus1
+      JWT_SECRET: Linqi@2024
+      JWT_EXPIRE_DAYS: "7"
+      LOG_LEVEL: info
+      LOG_OUTPUT: console
+      HOST: "0.0.0.0"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

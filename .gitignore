@@ -1,0 +1,51 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+server
+
+# Test binary
+*.test
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Env
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+vendor/
+dist/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Swagger (generated)
+docs/docs.go
+docs/swagger.json
+docs/swagger.yaml
+
+# WorkBuddy workspace
+.workbuddy/
+
+# Temporary test files
+nul
+test_phase6*.py
+test_phase6*.sh
+*_login.json
+*admin_login.json
+backend_phase6.log
+*.bak
