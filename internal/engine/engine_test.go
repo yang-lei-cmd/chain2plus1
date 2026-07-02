@@ -24,11 +24,11 @@ func ic() string {
 	return "IC" + strconv.FormatInt(time.Now().UnixNano()+icSeq, 36)
 }
 
-func setupEngineDB(t *testing.T) *gorm.DB {
-	t.Helper()
+func setupEngineDB(tb testing.TB) *gorm.DB {
+	tb.Helper()
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	if err != nil {
-		t.Fatalf("Failed to open test DB: %v", err)
+		tb.Fatalf("Failed to open test DB: %v", err)
 	}
 	db.AutoMigrate(&model.User{}, &model.ProfitShare{}, &model.ChainRecord{}, &model.Order{}, &model.Product{}, &model.Supplier{})
 	sqlDB, _ := db.DB()
@@ -150,5 +150,49 @@ func TestDistributeCommission(t *testing.T) {
 	db.Model(&model.ProfitShare{}).Where("order_id = ?", order.ID).Count(&profitCount)
 	if profitCount != 2 {
 		t.Errorf("expected 2 profit records, got %d", profitCount)
+	}
+}
+
+// ============================================================
+// Benchmarks
+// ============================================================
+
+func BenchmarkCalculateCommission(b *testing.B) {
+	db := setupEngineDB(b)
+	cfg := DefaultChainConfig()
+
+	// Build a 5-level chain
+	users := make([]model.User, 6)
+	for i := 0; i < 6; i++ {
+		u := model.User{Username: "bench" + strconv.Itoa(i), Role: "customer", Level: i + 1, Status: 1, InviteCode: ic()}
+		if i > 0 {
+			u.ParentID = &users[i-1].ID
+		}
+		db.Create(&u)
+		users[i] = u
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		CalculateCommission(db, users[5].ID, 100000, cfg)
+	}
+}
+
+func BenchmarkDistributeCommission(b *testing.B) {
+	db := setupEngineDB(b)
+	cfg := DefaultChainConfig()
+
+	alice := model.User{Username: "ba", Role: "customer", Level: 1, Status: 1, InviteCode: ic()}
+	db.Create(&alice)
+	bob := model.User{Username: "bb", Role: "customer", Level: 2, Status: 1, ParentID: &alice.ID, InviteCode: ic()}
+	db.Create(&bob)
+
+	order := model.Order{UserID: bob.ID, ProductID: 1, OrderNo: "B" + strconv.FormatInt(time.Now().UnixNano(), 36), Amount: 50000, Status: "paid"}
+	db.Create(&order)
+	details := CalculateCommission(db, bob.ID, order.Amount, cfg)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		DistributeCommission(db, order.ID, bob.ID, order.Amount, details)
 	}
 }
