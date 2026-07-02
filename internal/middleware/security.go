@@ -94,3 +94,44 @@ func (rl *rateLimiter) cleanup(olderThan time.Duration) {
 		}
 	}
 }
+
+// NewRateLimiter 创建一个独立的速率限制器实例
+func NewRateLimiter() *rateLimiter {
+	return &rateLimiter{
+		requests: make(map[string]*rateEntry),
+	}
+}
+
+// AuthRateLimit 登录接口专用速率限制 (5次/60秒)
+var authLimiter = NewRateLimiter()
+
+func AuthRateLimit() gin.HandlerFunc {
+	cleanupInterval := 120 * time.Second
+	return func(c *gin.Context) {
+		ip := c.ClientIP()
+		authLimiter.mu.Lock()
+		entry, exists := authLimiter.requests[ip]
+		now := time.Now()
+		if now.UnixMilli()%int64(cleanupInterval.Milliseconds()) < 100 {
+			go authLimiter.cleanup(cleanupInterval)
+		}
+		if !exists || now.Sub(entry.windowStart) > 60*time.Second {
+			authLimiter.requests[ip] = &rateEntry{count: 1, windowStart: now}
+			authLimiter.mu.Unlock()
+			c.Next()
+			return
+		}
+		if entry.count >= 5 {
+			authLimiter.mu.Unlock()
+			c.JSON(http.StatusTooManyRequests, gin.H{
+				"code":    429,
+				"message": "登录尝试过于频繁，请60秒后再试",
+			})
+			c.Abort()
+			return
+		}
+		entry.count++
+		authLimiter.mu.Unlock()
+		c.Next()
+	}
+}

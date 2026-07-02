@@ -70,8 +70,8 @@ func Setup(cfg *config.Config, wsHandler *event.WSHandler) *gin.Engine {
 	v1 := engine.Group("/api/v1")
 	{
 		// 公开路由
-		v1.POST("/auth/register", handler.Register)
-		v1.POST("/auth/login", handler.Login)
+		v1.POST("/auth/register", middleware.AuthRateLimit(), handler.Register)
+		v1.POST("/auth/login", middleware.AuthRateLimit(), handler.Login)
 
 		// 需要鉴权的路由
 		auth := v1.Group("")
