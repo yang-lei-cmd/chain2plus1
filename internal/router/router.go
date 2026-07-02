@@ -183,6 +183,15 @@ func Setup(cfg *config.Config, wsHandler *event.WSHandler) *gin.Engine {
 			// Phase C: 审计日志路由
 			// ============================================================
 			admin.GET("/audit-logs", handler.ListAuditLogs)
+
+			// ============================================================
+			// 方向2: CSV导出 + 代理商报表
+			// ============================================================
+			admin.GET("/export/profits", handler.ExportProfitsCSV)
+			admin.GET("/export/orders", handler.ExportOrdersCSV)
+			admin.GET("/export/withdraws", handler.ExportWithdrawsCSV)
+			admin.GET("/agent-report/:user_id", handler.AgentReport)
+			admin.GET("/team-tree/:user_id", handler.TeamTree)
 		}
 	}
 

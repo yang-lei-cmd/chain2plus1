@@ -152,6 +152,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .share-qr-section { text-align: center; margin-bottom: 16px; }
 .share-qr-container { display: flex; justify-content: center; padding: 8px 0; }
 
+/* ========== Export & Agent Report ========== */
+.export-buttons { display: flex; flex-direction: column; gap: 8px; }
+.export-buttons .btn { text-align: center; text-decoration: none; display: block; }
+.agent-report { margin-top: 12px; }
+
 /* ========== Loading / Empty ========== */
 .loading { text-align: center; padding: 40px; color: #999; font-size: 14px; }
 .empty-state { text-align: center; padding: 30px; color: #999; font-size: 14px; }

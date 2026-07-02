@@ -251,4 +251,18 @@ export const api = {
     api.get<{ trend: any[] }>(`/admin/dashboard/revenue-trend?days=${days}`),
   getUserGrowth: (days = 7) =>
     api.get<{ growth: any[] }>(`/admin/dashboard/user-growth?days=${days}`),
+
+  // ---- CSV Export ----
+  getExportURL: (type: 'profits' | 'orders' | 'withdraws', start?: string, end?: string) => {
+    const params = new URLSearchParams();
+    if (start) params.set('start', start);
+    if (end) params.set('end', end);
+    return `${BASE_URL}/admin/export/${type}?${params}`;
+  },
+
+  // ---- Agent Report ----
+  getAgentReport: (userId: number) =>
+    api.get<{ user: any; team_stats: any; earnings: any; top_children: any[] }>(`/admin/agent-report/${userId}`),
+  getTeamTree: (userId: number, depth = 3) =>
+    api.get<{ tree: any; depth: number }>(`/admin/team-tree/${userId}?depth=${depth}`),
 };
